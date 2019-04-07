@@ -2,24 +2,24 @@
 # ================
 
 # VPN Settings
-VPN_CONFID=l1234567890
-VPN_CONFNAME=l2tpclient
-VPN_PROTO=l2tp
-VPN_UINAME=YourVPN
+VPN_CONFID=o1533803011
+VPN_CONFNAME=ovpnclient
+VPN_PROTO=openvpn
+VPN_UINAME=NordVPN_P2P
 
 # VPN Optionals
-VPN_TYPE=ppp
-VPN_INTERFACE=ppp0
+VPN_TYPE=tun
+VPN_INTERFACE=tun0
 VPN_RETRY=5
 VPN_INTERVAL=10
 
 # VPN Features
-PORT_FWD=
+PORT_FWD=50635
 IP_CHECK=http://ipinfo.io/ip
 
 # App Settings
-TRANS_USER=transmission
-TRANS_GROUP=users
+TRANS_USER=sc-transmission
+TRANS_GROUP=transmission
 TRANS_VAR=/volume1/@appstore/transmission/var
 
 # Script Starts
@@ -119,8 +119,8 @@ stop)
 repair)
     # Define variables
     VPN_ADDR=`ifconfig $VPN_INTERFACE | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}'`
-    VPN_RESP=`curl -sS --interface $VPN_INTERFACE $IP_CHECK`
-    VPN_PORT=`php -n portforward.php $VPN_ADDR $PORT_FWD`
+    VPN_RESP=`ip addr show $VPN_INTERFACE up | egrep 'inet '|sed 's/inet \(.*\)\/.*/\1/'|awk '{$1=$1};1'`
+    #VPN_PORT=`php -n portforward.php $VPN_ADDR $PORT_FWD`
 
     # Redefine variables if empty (bugfix)
     if [ "$VPN_ADDR" = "" ] || [ "$VPN_RESP" = "" ]; then
@@ -133,8 +133,8 @@ repair)
     echo "API Query IP is "$VPN_RESP
     echo "Network Port is "$VPN_PORT
 
-    # If IP Address does not match or port is closed
-    if [ "$VPN_ADDR" != "$VPN_RESP" ] || [ "$VPN_PORT" == "closed" ]; then
+    # If VPN is not running
+    if [ "$VPN_RESP" != "$VPN_ADDR" ]; then
 
         # Show Message
         echo "VPN is not working ..."
@@ -165,7 +165,7 @@ repair)
 
         # Redefine variables
         VPN_ADDR=`ifconfig $VPN_INTERFACE | grep 'inet addr:' | cut -d: -f2 | awk '{print $1}'`
-        VPN_RESP=`curl -sS --interface $VPN_INTERFACE $IP_CHECK`
+        VPN_RESP=`ip addr show $VPN_INTERFACE up | egrep 'inet '|sed 's/inet \(.*\)\/.*/\1/'|awk '{$1=$1};1'`
 
         # Redefine variables if empty (bugfix)
         if [ "$VPN_ADDR" = "" ] || [ "$VPN_RESP" = "" ]; then
